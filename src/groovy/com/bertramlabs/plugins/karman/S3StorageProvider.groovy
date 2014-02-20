@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package com.bertramlabs.plugins.karman
 import org.jets3t.service.*
 import org.jets3t.service.security.AWSCredentials
 import org.jets3t.service.impl.rest.httpclient.RestS3Service
 
 class S3StorageProvider extends StorageProvider {
-	String name = "Amazon S3"
+	static String name = "Amazon S3"
 	String accessKey
 	String secret
 

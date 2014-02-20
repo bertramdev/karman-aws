@@ -18,6 +18,10 @@ grails.project.dependency.resolution = {
     }
     dependencies {
         compile 'net.java.dev.jets3t:jets3t:0.9.0'
+        build 'org.apache.httpcomponents:httpcore:4.2'
+        build 'org.apache.httpcomponents:httpclient:4.2'
+        runtime 'org.apache.httpcomponents:httpcore:4.2'
+        runtime 'org.apache.httpcomponents:httpclient:4.2'
     }
 
     plugins {
