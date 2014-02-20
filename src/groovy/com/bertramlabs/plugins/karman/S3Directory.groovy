@@ -13,7 +13,7 @@ class S3Directory extends com.bertramlabs.plugins.karman.Directory {
 	}
 
 	List listFiles(options=[:]) {
-		def objects = provider.s3Service.listObjects(s3Bucket)
+		def objects = provider.s3Service.listObjects(s3Bucket,options?.prefix,options?.delimiter)
 		objects.collect { object -> cloudFileFromS3Object(object) }
 	}
 
