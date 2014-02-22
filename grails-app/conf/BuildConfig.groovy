@@ -19,7 +19,7 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
-        runtime ":karman:0.1.1"
+        // runtime ":karman:0.1.1"
         build(":tomcat:$grailsVersion",
               ":release:2.2.1") {
             export = false
@@ -27,4 +27,4 @@ grails.project.dependency.resolution = {
     }
 }
 
-// grails.plugin.location."karman" = "../karman"
+grails.plugin.location."karman" = "../karman"
