@@ -16,115 +16,180 @@
 
 package com.bertramlabs.plugins.karman
 
-import org.jets3t.service.model.*
-import org.jets3t.service.*
-import org.apache.commons.io.IOUtils
-import groovy.util.logging.Log4j
-import java.io.ByteArrayInputStream;
+import com.amazonaws.services.s3.AmazonS3Client
+import com.amazonaws.services.s3.model.*
 
-@Log4j
 class S3CloudFile extends CloudFile {
-	S3Directory parent
+
+    S3Directory parent
 	S3Object object
-	def detailsOnly = true
-	Boolean existsFlag = null
+    S3ObjectSummary summary // Only set when object is retrieved by listFiles
 
-	S3Object getS3Object(metaOnly=false) {
-		if(!this.exists()) {
-			object = object ?: new S3Object(parent.s3Bucket, name)
-			return object
-		}
-		if(!object || (metaOnly == false && detailsOnly == true)) {
-			try {
-				if(metaOnly) {
-					object = provider.s3Service.getObjectDetails(parent.s3Bucket, name)
-					detailsOnly = true
-				} else {
-					object = provider.s3Service.getObject(parent.s3Bucket, name)
-					detailsOnly = false
-				}
-			} catch(S3ServiceException ex) {
-				log.warn("Karman-AWS Error Fetching S3Object",ex)
-			}
-				
-		}
-		return object
+    private Boolean loaded = false
+	private Boolean metaDataLoaded = false
+    private Boolean existsFlag = null
+
+    /**
+     * Content length metadata
+     * @return
+     */
+    Long getContentLength() {
+        if (!metaDataLoaded) {
+            loadObjectMetaData()
+        }
+        s3Object.objectMetadata.contentLength
+    }
+    void setContentLength(int contentLength) {
+        s3Object.objectMetadata.contentLength = contentLength
+    }
+
+    /**
+     * Content type metadata
+     * @return
+     */
+    String getContentType() {
+        if (!metaDataLoaded) {
+            loadObjectMetaData()
+        }
+        s3Object.objectMetadata.contentType
+    }
+    void setContentType(String contentType) {
+        s3Object.objectMetadata.contentType = contentType
+    }
+
+    /**
+     * Bytes setter/getter
+     * @param bytes
+     */
+    byte[] getBytes() {
+        def result = inputStream?.bytes
+        inputStream.close()
+        return result
+    }
+    void setBytes(bytes) {
+        s3Object.objectContent = new S3ObjectInputStream(new ByteArrayInputStream(bytes), null)
+        setContentLength(bytes.length)
+    }
+
+    /**
+     * Input stream getter
+     * @return
+     */
+    InputStream getInputStream() {
+        if (!object) {
+            loadObject()
+        }
+		s3Object.objectContent
 	}
 
-	InputStream getInputStream() {
-		s3Object?.dataInputStream
-	}
-
-	String getText(String encoding=null) {
-		def result = null
-		if(encoding) {
+    /**
+     * Text setter/getter
+     * @param encoding
+     * @return
+     */
+	String getText(String encoding = null) {
+		def result
+		if (encoding) {
 			result = inputStream?.getText(encoding)
 		} else {
 			result = inputStream?.text
 		}
-		s3Object?.closeDataInputStream()
+		inputStream?.close()
 		return result
 	}
-
-	byte[] getBytes() {
-		def result = inputStream?.bytes
-		s3Object?.closeDataInputStream()
-		return result
-	}
-
-	void setText(String text) {
+    void setText(String text) {
 		setBytes(text.bytes)
 	}
 
-	void setBytes(bytes) {
-		InputStream is = new ByteArrayInputStream(bytes);
-		s3Object?.setDataInputStream(is)
-		s3Object?.setContentLength(bytes.length)
+    /**
+     * Get URL or pre-signed URL if expirationDate is set
+     * @param expirationDate
+     * @return
+     */
+    String getURL(Date expirationDate = null) {
+        if (expirationDate) {
+            s3Client.generatePresignedUrl(parent.name, name, expirationDate)
+        } else {
+            "${s3Client.endpoint}/${parent.name}/${name}"
+        }
+    }
 
-	}
-
-	Long getContentLength() {
-		getS3Object(true)?.contentLength
-	}
-
-	String getContentType() {
-		getS3Object(true)?.contentType
-	}
-
-	void setContentType(String contentType) {
-		s3Object?.setContentType(contentType)
-	}
-
+    /**
+     * Check if file exists
+     * @return
+     */
 	Boolean exists() {
-		if(existsFlag != null) {
+		if (existsFlag != null) {
 			return existsFlag
 		}
-		try {
-			provider.s3Service.getObjectDetails(parent.s3Bucket, name)
-			existsFlag = true
-		} catch(S3ServiceException ex) {
-			println "Service Exception!"
-			if(ex.responseCode == 404) {
-				existsFlag = false
-			}
-		} 
-		
+        if (!name) {
+            return false
+        }
+        //try {
+            ObjectListing objectListing = s3Client.listObjects(parent.name, name)
+            if (objectListing.objectSummaries) {
+                summary = objectListing.objectSummaries.first()
+                existsFlag = true
+            } else {
+                existsFlag = false
+            }
+        //} catch (AmazonS3Exception exception) {
+            //log.warn(exception)
+        //} catch (AmazonClientException exception) {
+            //log.warn(exception)
+        //}
 		return existsFlag
 	}
 
-	def save() {
-		def myObject = s3Object
-		if(exists()) {
+    /**
+     * Save file
+     * @return
+     */
+	def save(CannedAccessControlList cannedAccessControlList = null) {
+		/*if (exists()) {
 			delete()
-		}
-		provider.s3Service.putObject(parent.s3Bucket, s3Object);
+		}*/
+        if (cannedAccessControlList) {
+            s3Object.objectMetadata.setHeader('x-amz-acl', cannedAccessControlList)
+        }
+		s3Client.putObject(parent.name, name, inputStream, object.objectMetadata)
 		object = null
+        summary = null
 		existsFlag = true
 	}
 
+    /**
+     * Delete file
+     * @return
+     */
 	def delete() {
-		provider.s3Service.deleteObject(parent.s3Bucket, name)
+        s3Client.deleteObject(parent.name, name)
 		existsFlag = false
 	}
+
+    // PRIVATE
+
+    private AmazonS3Client getS3Client() {
+        parent.provider.s3Client
+    }
+
+    private S3Object getS3Object() {
+        if (!object) {
+            object = new S3Object(bucketName: parent.name, key: name)
+            loaded = false
+        }
+        object
+    }
+
+    private void loadObject() {
+        object = s3Client.getObject(parent.name, name)
+        loaded = true
+        metaDataLoaded = false
+    }
+
+    private void loadObjectMetaData() {
+        s3Object.objectMetadata = s3Client.getObjectMetadata(parent.name, name)
+        metaDataLoaded = true
+    }
 
 }

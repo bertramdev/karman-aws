@@ -15,34 +15,70 @@
  */
  
 package com.bertramlabs.plugins.karman
-import org.jets3t.service.model.*
-import org.jets3t.service.*
 
-class S3Directory extends com.bertramlabs.plugins.karman.Directory {
-	String region
-	S3Bucket getS3Bucket() {
-		new S3Bucket(name)
-	}
+import com.amazonaws.services.s3.AmazonS3Client
+import com.amazonaws.services.s3.model.Bucket
+import com.amazonaws.services.s3.model.ListObjectsRequest
+import com.amazonaws.services.s3.model.ObjectListing
+import com.amazonaws.services.s3.model.S3ObjectSummary
 
+class S3Directory extends Directory {
+
+    String region = ''
+
+    /**
+     * Check if bucket exists
+     * @return Boolean
+     */
 	Boolean exists() {
-		provider?.s3Service?.checkBucketStatus(name) == org.jets3t.service.StorageService.BUCKET_STATUS__MY_BUCKET
+        s3Client.doesBucketExist(name)
 	}
 
-	List listFiles(options=[:]) {
-		def objects = provider.s3Service.listObjects(s3Bucket,options?.prefix,options?.delimiter)
-		objects.collect { object -> cloudFileFromS3Object(object) }
+    /**
+     * List bucket files
+     * @param options (prefix, marker, delimiter and maxKeys)
+     * @return List
+     */
+	List listFiles(options = [:]) {
+        ListObjectsRequest request = new ListObjectsRequest(name, options?.prefix, options?.marker, options?.delimiter, options?.maxKeys)
+        ObjectListing objectListing = s3Client.listObjects(request)
+        objectListing.objectSummaries.collect { S3ObjectSummary summary -> cloudFileFromS3Object(summary) }
 	}
 
-	def save() {
-
+    /**
+     * Create bucket for a given region (default to region in config if not defined)
+     * @return Bucket
+     */
+	void save() {
+        if (region) {
+            s3Client.createBucket(name, region)
+        } else {
+            s3Client.createBucket(name)
+        }
 	}
 
 	CloudFile getFile(String name) {
-		new S3CloudFile(provider: provider, parent: this, name: name)
+		new S3CloudFile(
+                provider: provider,
+                parent: this,
+                name: name
+        )
 	}
 
+    // PRIVATE
 
-	private S3CloudFile cloudFileFromS3Object(object) {
-		new S3CloudFile(provider: provider, parent: this, name: object.key, object: object, existsFlag: true)
-	}
+    private S3CloudFile cloudFileFromS3Object(S3ObjectSummary summary) {
+        new S3CloudFile(
+                provider: provider,
+                parent: this,
+                name: summary.key,
+                summary: summary,
+                existsFlag: true
+        )
+    }
+
+    private AmazonS3Client getS3Client(String region = '') {
+        provider.s3Client
+    }
+
 }
