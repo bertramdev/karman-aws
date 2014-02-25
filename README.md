@@ -1,6 +1,8 @@
 Karman AWS
 =============
 
+[![Build Status](https://travis-ci.org/bertramdev/karman-aws.png)](https://travis-ci.org/bertramdev/karman-aws)
+
 Karman AWS is a S3 implementation of the Karman Cloud Service / Storage Interface. It allows one to interact with Amazon S3 via the standard Karman API interfaces
 
 
