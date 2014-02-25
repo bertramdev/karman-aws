@@ -1,5 +1,5 @@
 class KarmanAwsGrailsPlugin {
-    def version         = "0.2.0-SNAPSHOT"
+    def version         = "0.2.0"
     def grailsVersion   = "2.0 > *"
     def title           = "Karman AWS Plugin"
     def author          = "David Estes"
