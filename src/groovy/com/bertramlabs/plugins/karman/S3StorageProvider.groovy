@@ -16,6 +16,9 @@
 
 package com.bertramlabs.plugins.karman
 
+import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.regions.Region
+import com.amazonaws.regions.RegionUtils
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.Bucket
 import grails.plugin.awssdk.AmazonWebService
@@ -25,6 +28,9 @@ class S3StorageProvider extends StorageProvider {
 
     static String name = "Amazon S3"
 
+    String accessKey = ''
+    String secretKey = ''
+    String region = ''
     AmazonWebService amazonWebService
 
 	Directory getDirectory(String name) {
@@ -36,11 +42,22 @@ class S3StorageProvider extends StorageProvider {
         buckets.collect { bucket -> directoryFromS3Bucket(bucket)}
 	}
 
-    AmazonS3Client getS3Client(String regionName = '') {
-        if (!amazonWebService) {
-            amazonWebService = Holders.applicationContext.getBean('amazonWebService')
+    AmazonS3Client getS3Client() {
+        AmazonS3Client client
+        if (accessKey && secretKey) {
+            BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey)
+            client = new AmazonS3Client(credentials)
+            if (region) {
+                Region region = RegionUtils.getRegion(region)
+                client.region = region
+            }
+        } else {
+            if (!amazonWebService) {
+                amazonWebService = Holders.applicationContext.getBean('amazonWebService')
+            }
+            client = amazonWebService.getS3(region)
         }
-        amazonWebService.getS3(regionName)
+        client
     }
 
     // PRIVATE

@@ -18,6 +18,47 @@ class S3StorageProviderSpec extends Specification {
         provider.amazonWebService = Mock(AmazonWebService)
     }
 
+    void "Getting s3Client provider"() {
+        when:
+        def client = provider.s3Client
+
+        then:
+        client
+        1 * provider.amazonWebService.getS3('') >> {
+            Mock(AmazonS3Client)
+        }
+    }
+
+    void "Getting s3Client provider with region"() {
+        given:
+        provider.region = 'eu-west-1'
+
+        when:
+        def client = provider.s3Client
+
+        then:
+        client
+        1 * provider.amazonWebService.getS3('eu-west-1') >> {
+            Mock(AmazonS3Client)
+        }
+    }
+
+    void "Getting s3Client provider with credentials and region"() {
+        provider = new S3StorageProvider(
+                accessKey: 'ACCESS_KEY',
+                secretKey: 'SECRET_KEY',
+                region: 'eu-west-1'
+        )
+
+        when:
+        def client = provider.s3Client
+
+        then:
+        client
+        client instanceof AmazonS3Client
+        client.region.toString() == 'eu-west-1'
+    }
+
     void "Getting directories"() {
         when:
         def directories = provider.getDirectories()

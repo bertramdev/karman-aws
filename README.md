@@ -20,6 +20,8 @@ If you do not provide credentials in grails-app/conf/Config.groovy, a credential
 - Java System Properties - aws.accessKeyId and aws.secretKey
 - Instance profile credentials delivered through the Amazon EC2 metadata service (IAM role)
 
+You can also specify credentials when you instantiate S3StorageProvider`.
+
 
 Usage / Documentation
 ---------------------
@@ -28,7 +30,11 @@ To instantiate an S3 provider simply do:
 
 ```groovy
 import com.bertramlabs.plugins.karman.*
+
+// To use credentials from Config.groovy or credential provider chain
 def provider = new S3StorageProvider()
+// Or
+provider = new S3StorageProvider(accessKey: ACCESS_KEY, secretKey: SECRET_KEY, region: 'eu-west-1')
 
 //example getting file contents
 def file = provider['mybucket']['example.txt']
