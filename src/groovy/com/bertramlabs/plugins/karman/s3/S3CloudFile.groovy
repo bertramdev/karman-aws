@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.bertramlabs.plugins.karman
+package com.bertramlabs.plugins.karman.s3
 
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.Headers
 import com.amazonaws.services.s3.model.*
+import com.bertramlabs.plugins.karman.CloudFile
 
 class S3CloudFile extends CloudFile {
 
