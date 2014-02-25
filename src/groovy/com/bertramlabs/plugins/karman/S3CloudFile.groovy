@@ -30,8 +30,29 @@ class S3CloudFile extends CloudFile {
     private Boolean existsFlag = null
 
     /**
+     * Meta attributes setter/getter
+     */
+    void setMetaAttribute(key, value) {
+        s3Object.objectMetadata.userMetadata[key] = value
+    }
+    String getMetaAttribute(key) {
+        if (!metaDataLoaded) {
+            loadObjectMetaData()
+        }
+        s3Object.objectMetadata.userMetadata[key]
+    }
+    Map getMetaAttributes() {
+        if (!metaDataLoaded) {
+            loadObjectMetaData()
+        }
+        s3Object.objectMetadata.userMetadata
+    }
+    void removeMetaAttribute(key) {
+        s3Object.objectMetadata.userMetadata.remove(key)
+    }
+
+    /**
      * Content length metadata
-     * @return
      */
     Long getContentLength() {
         if (!metaDataLoaded) {
@@ -45,7 +66,6 @@ class S3CloudFile extends CloudFile {
 
     /**
      * Content type metadata
-     * @return
      */
     String getContentType() {
         if (!metaDataLoaded) {
@@ -59,7 +79,6 @@ class S3CloudFile extends CloudFile {
 
     /**
      * Bytes setter/getter
-     * @param bytes
      */
     byte[] getBytes() {
         def result = inputStream?.bytes
@@ -73,7 +92,7 @@ class S3CloudFile extends CloudFile {
 
     /**
      * Input stream getter
-     * @return
+     * @return inputStream
      */
     InputStream getInputStream() {
         if (!object) {
@@ -85,7 +104,7 @@ class S3CloudFile extends CloudFile {
     /**
      * Text setter/getter
      * @param encoding
-     * @return
+     * @return text
      */
 	String getText(String encoding = null) {
 		def result
@@ -104,19 +123,19 @@ class S3CloudFile extends CloudFile {
     /**
      * Get URL or pre-signed URL if expirationDate is set
      * @param expirationDate
-     * @return
+     * @return url
      */
-    String getURL(Date expirationDate = null) {
+    URL getURL(Date expirationDate = null) {
         if (expirationDate) {
             s3Client.generatePresignedUrl(parent.name, name, expirationDate)
         } else {
-            "${s3Client.endpoint}/${parent.name}/${name}"
+            new URL("${s3Client.endpoint}/${parent.name}/${name}")
         }
     }
 
     /**
      * Check if file exists
-     * @return
+     * @return true or false
      */
 	Boolean exists() {
 		if (existsFlag != null) {
@@ -143,7 +162,6 @@ class S3CloudFile extends CloudFile {
 
     /**
      * Save file
-     * @return
      */
 	def save(CannedAccessControlList cannedAccessControlList = null) {
 		/*if (exists()) {
@@ -160,7 +178,6 @@ class S3CloudFile extends CloudFile {
 
     /**
      * Delete file
-     * @return
      */
 	def delete() {
         s3Client.deleteObject(parent.name, name)
