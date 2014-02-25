@@ -1,6 +1,7 @@
 package karman.aws
 
 import com.amazonaws.services.s3.AmazonS3Client
+import com.amazonaws.services.s3.model.CannedAccessControlList
 import com.amazonaws.services.s3.model.ObjectListing
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.model.S3ObjectInputStream
@@ -41,6 +42,20 @@ class S3CloudFileSpec extends Specification {
             1 * client.listObjects(DIRECTORY_NAME, FILE_NAME) >> {
                 [objectSummaries: [new S3ObjectSummary(key: FILE_NAME, bucketName: DIRECTORY_NAME)]] as ObjectListing
             }
+            client
+        }
+    }
+
+    void "Getting file presigned URL"() {
+        when:
+        def URL = file.getURL(new Date() + 1)
+
+        then:
+        URL
+        URL.toString() == 'http://some.presigned.url'
+        1 * provider.amazonWebService.getS3(_) >> {
+            def client = Mock(AmazonS3Client)
+            1 * client.generatePresignedUrl(DIRECTORY_NAME, FILE_NAME, _) >> new URL('http://some.presigned.url')
             client
         }
     }
@@ -127,6 +142,23 @@ class S3CloudFileSpec extends Specification {
 
         when:
         file.save()
+
+        then:
+        !file.summary
+        !file.object
+        1 * provider.amazonWebService.getS3(_) >> {
+            def client = Mock(AmazonS3Client)
+            1 * client.putObject(DIRECTORY_NAME, FILE_NAME, _, _)
+            client
+        }
+    }
+
+    void "Saving file with canned ACL"() {
+        given:
+        file.text = "Setting some value to this file"
+
+        when:
+        file.save(CannedAccessControlList.PublicRead)
 
         then:
         !file.summary
