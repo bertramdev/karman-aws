@@ -1,11 +1,12 @@
 package karman.aws
 
 import com.amazonaws.services.s3.AmazonS3Client
-import com.amazonaws.services.s3.model.CannedAccessControlList
+import com.amazonaws.services.s3.Headers
 import com.amazonaws.services.s3.model.ObjectListing
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.model.S3ObjectInputStream
 import com.amazonaws.services.s3.model.S3ObjectSummary
+import com.bertramlabs.plugins.karman.CloudFileACL
 import com.bertramlabs.plugins.karman.S3CloudFile
 import com.bertramlabs.plugins.karman.S3Directory
 import com.bertramlabs.plugins.karman.S3StorageProvider
@@ -136,6 +137,56 @@ class S3CloudFileSpec extends Specification {
         }
     }
 
+    void "Setting meta attribute"() {
+        when:
+        file.setMetaAttribute(Headers.CACHE_CONTROL, 'someValue')
+
+        then:
+        file.object.objectMetadata.cacheControl == 'someValue'
+
+        when:
+        file.setMetaAttribute(Headers.CONTENT_DISPOSITION, 'someValue')
+
+        then:
+        file.object.objectMetadata.contentDisposition == 'someValue'
+
+        when:
+        file.setMetaAttribute(Headers.CONTENT_ENCODING, 'someValue')
+
+        then:
+        file.object.objectMetadata.contentEncoding == 'someValue'
+
+        when:
+        file.setMetaAttribute(Headers.CONTENT_LENGTH, 1000)
+
+        then:
+        file.object.objectMetadata.contentLength == 1000
+
+        when:
+        file.setMetaAttribute(Headers.CONTENT_MD5, 'someValue')
+
+        then:
+        file.object.objectMetadata.contentMD5 == 'someValue'
+
+        when:
+        file.setMetaAttribute(Headers.CONTENT_TYPE, 'someValue')
+
+        then:
+        file.object.objectMetadata.contentType == 'someValue'
+
+        when:
+        file.setMetaAttribute(Headers.EXPIRES, new Date())
+
+        then:
+        file.object.objectMetadata.httpExpiresDate
+
+        when:
+        file.setMetaAttribute('some-user-data', 'someValue')
+
+        then:
+        file.object.objectMetadata.userMetadata['some-user-data'] == 'someValue'
+    }
+
     void "Saving file"() {
         given:
         file.text = "Setting some value to this file"
@@ -158,7 +209,7 @@ class S3CloudFileSpec extends Specification {
         file.text = "Setting some value to this file"
 
         when:
-        file.save(CannedAccessControlList.PublicRead)
+        file.save(CloudFileACL.PublicRead)
 
         then:
         !file.summary

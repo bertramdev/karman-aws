@@ -17,6 +17,7 @@
 package com.bertramlabs.plugins.karman
 
 import com.amazonaws.services.s3.AmazonS3Client
+import com.amazonaws.services.s3.Headers
 import com.amazonaws.services.s3.model.*
 
 class S3CloudFile extends CloudFile {
@@ -33,7 +34,35 @@ class S3CloudFile extends CloudFile {
      * Meta attributes setter/getter
      */
     void setMetaAttribute(key, value) {
-        s3Object.objectMetadata.userMetadata[key] = value
+        switch(key) {
+            case Headers.CACHE_CONTROL:
+                s3Object.objectMetadata.cacheControl = value
+                break
+            case Headers.CONTENT_DISPOSITION:
+                s3Object.objectMetadata.contentDisposition = value
+                break
+            case Headers.CONTENT_ENCODING:
+                s3Object.objectMetadata.contentEncoding = value
+                break
+            case Headers.CONTENT_LENGTH:
+                s3Object.objectMetadata.contentLength = value
+                break
+            case Headers.CONTENT_MD5:
+                s3Object.objectMetadata.contentMD5 = value
+                break
+            case Headers.CONTENT_TYPE:
+                s3Object.objectMetadata.contentType = value
+                break
+            case Headers.EXPIRES:
+                s3Object.objectMetadata.httpExpiresDate = value
+                break
+            case Headers.S3_CANNED_ACL:
+                s3Object.objectMetadata.setHeader(Headers.S3_CANNED_ACL, value)
+                break
+            default:
+                // User specific meta
+                s3Object.objectMetadata.userMetadata[key] = value
+        }
     }
     String getMetaAttribute(key) {
         if (!metaDataLoaded) {
@@ -61,7 +90,7 @@ class S3CloudFile extends CloudFile {
         s3Object.objectMetadata.contentLength
     }
     void setContentLength(int contentLength) {
-        s3Object.objectMetadata.contentLength = contentLength
+        setMetaAttribute(Headers.CONTENT_LENGTH, contentLength)
     }
 
     /**
@@ -74,7 +103,7 @@ class S3CloudFile extends CloudFile {
         s3Object.objectMetadata.contentType
     }
     void setContentType(String contentType) {
-        s3Object.objectMetadata.contentType = contentType
+        setMetaAttribute(Headers.CONTENT_TYPE, contentType)
     }
 
     /**
@@ -126,10 +155,12 @@ class S3CloudFile extends CloudFile {
      * @return url
      */
     URL getURL(Date expirationDate = null) {
-        if (expirationDate) {
-            s3Client.generatePresignedUrl(parent.name, name, expirationDate)
-        } else {
-            new URL("${s3Client.endpoint}/${parent.name}/${name}")
+        if (valid) {
+            if (expirationDate) {
+                s3Client.generatePresignedUrl(parent.name, name, expirationDate)
+            } else {
+                new URL("${s3Client.endpoint}/${parent.name}/${name}")
+            }
         }
     }
 
@@ -138,50 +169,60 @@ class S3CloudFile extends CloudFile {
      * @return true or false
      */
 	Boolean exists() {
-		if (existsFlag != null) {
-			return existsFlag
-		}
-        if (!name) {
-            return false
-        }
-        //try {
-            ObjectListing objectListing = s3Client.listObjects(parent.name, name)
-            if (objectListing.objectSummaries) {
-                summary = objectListing.objectSummaries.first()
-                existsFlag = true
-            } else {
-                existsFlag = false
+        if (valid) {
+            if (existsFlag != null) {
+                return existsFlag
             }
-        //} catch (AmazonS3Exception exception) {
-            //log.warn(exception)
-        //} catch (AmazonClientException exception) {
-            //log.warn(exception)
-        //}
-		return existsFlag
+            if (!name) {
+                return false
+            }
+            //try {
+                ObjectListing objectListing = s3Client.listObjects(parent.name, name)
+                if (objectListing.objectSummaries) {
+                    summary = objectListing.objectSummaries.first()
+                    existsFlag = true
+                } else {
+                    existsFlag = false
+                }
+            //} catch (AmazonS3Exception exception) {
+                //log.warn(exception)
+            //} catch (AmazonClientException exception) {
+                //log.warn(exception)
+            //}
+            existsFlag
+        } else {
+            false
+        }
 	}
 
     /**
      * Save file
      */
-	def save(CannedAccessControlList cannedAccessControlList = null) {
-		/*if (exists()) {
-			delete()
-		}*/
-        if (cannedAccessControlList) {
-            s3Object.objectMetadata.setHeader('x-amz-acl', cannedAccessControlList)
+	def save(acl = '') {
+        if (valid) {
+            assert inputStream
+            /*if (exists()) {
+                delete()
+            }*/
+            if (acl) {
+                // If not define, it will use default acl (private)
+                setMetaAttribute(Headers.S3_CANNED_ACL, acl)
+            }
+            s3Client.putObject(parent.name, name, inputStream, object.objectMetadata)
+            object = null
+            summary = null
+            existsFlag = true
         }
-		s3Client.putObject(parent.name, name, inputStream, object.objectMetadata)
-		object = null
-        summary = null
-		existsFlag = true
 	}
 
     /**
      * Delete file
      */
 	def delete() {
-        s3Client.deleteObject(parent.name, name)
-		existsFlag = false
+        if (valid) {
+            s3Client.deleteObject(parent.name, name)
+            existsFlag = false
+        }
 	}
 
     // PRIVATE
@@ -199,14 +240,25 @@ class S3CloudFile extends CloudFile {
     }
 
     private void loadObject() {
-        object = s3Client.getObject(parent.name, name)
-        loaded = true
-        metaDataLoaded = false
+        if (valid) {
+            object = s3Client.getObject(parent.name, name)
+            loaded = true
+            metaDataLoaded = false
+        }
     }
 
     private void loadObjectMetaData() {
-        s3Object.objectMetadata = s3Client.getObjectMetadata(parent.name, name)
-        metaDataLoaded = true
+        if (valid) {
+            s3Object.objectMetadata = s3Client.getObjectMetadata(parent.name, name)
+            metaDataLoaded = true
+        }
+    }
+
+    private boolean isValid() {
+        assert parent
+        assert parent.name
+        assert name
+        true
     }
 
 }
