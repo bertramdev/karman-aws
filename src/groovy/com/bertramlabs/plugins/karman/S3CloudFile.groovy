@@ -167,6 +167,22 @@ class S3CloudFile extends CloudFile {
 		existsFlag = false
 	}
 
+    void setMetaAttribute(key, value) {
+        s3Object.objectMetadata[key] = value
+    }
+    
+    void getMetaAttribute(key) {
+        s3Object.objectMetadata[key]
+    }
+
+    void getMetaAttributes() {
+        s3Object.objectMetadata
+    }
+
+    void removeMetaAttribute(key) {
+        s3Object.objectMetadata.remove(key)
+    }
+
     // PRIVATE
 
     private AmazonS3Client getS3Client() {
