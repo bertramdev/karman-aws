@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.bertramlabs.plugins.karman
+package com.bertramlabs.plugins.karman.aws
 
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.regions.Region
 import com.amazonaws.regions.RegionUtils
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.Bucket
+import com.bertramlabs.plugins.karman.Directory
+import com.bertramlabs.plugins.karman.StorageProvider
 import grails.plugin.awssdk.AmazonWebService
 import grails.util.Holders
 

@@ -1,8 +1,7 @@
-package karman.aws
+package com.bertramlabs.plugins.karman.aws
 
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.Bucket
-import com.bertramlabs.plugins.karman.S3StorageProvider
 import grails.plugin.awssdk.AmazonWebService
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin

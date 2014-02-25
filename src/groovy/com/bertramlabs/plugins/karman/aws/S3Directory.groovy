@@ -14,13 +14,14 @@
  * limitations under the License.
  */
  
-package com.bertramlabs.plugins.karman
+package com.bertramlabs.plugins.karman.aws
 
 import com.amazonaws.services.s3.AmazonS3Client
-import com.amazonaws.services.s3.model.Bucket
 import com.amazonaws.services.s3.model.ListObjectsRequest
 import com.amazonaws.services.s3.model.ObjectListing
 import com.amazonaws.services.s3.model.S3ObjectSummary
+import com.bertramlabs.plugins.karman.CloudFile
+import com.bertramlabs.plugins.karman.Directory
 
 class S3Directory extends Directory {
 
