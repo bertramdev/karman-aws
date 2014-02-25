@@ -1,8 +1,9 @@
 grails.project.work.dir = 'target'
 
+grails.project.dependency.resolver = 'maven'
 grails.project.dependency.resolution = {
     inherits 'global'
-    log "warn"
+    log 'warn'
     legacyResolve false
     repositories {
         grailsCentral()
@@ -11,7 +12,6 @@ grails.project.dependency.resolution = {
     }
 
     dependencies {
-        compile 'net.java.dev.jets3t:jets3t:0.9.0'
         build 'org.apache.httpcomponents:httpcore:4.2'
         build 'org.apache.httpcomponents:httpclient:4.2'
         runtime 'org.apache.httpcomponents:httpcore:4.2'
@@ -19,12 +19,13 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
-        // runtime ":karman:0.1.1"
-        build(":tomcat:$grailsVersion",
-              ":release:2.2.1") {
+        build ':tomcat:7.0.50.1'
+        build(':release:3.0.1') {
             export = false
         }
+
+        runtime ':aws-sdk:1.7.1'
+        runtime ':karman:0.1.1'
     }
 }
-
-grails.plugin.location."karman" = "../karman"
+//grails.plugin.location."karman" = "../karman"

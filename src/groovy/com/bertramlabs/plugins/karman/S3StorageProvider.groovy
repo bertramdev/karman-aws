@@ -15,36 +15,41 @@
  */
 
 package com.bertramlabs.plugins.karman
-import org.jets3t.service.*
-import org.jets3t.service.security.AWSCredentials
-import org.jets3t.service.impl.rest.httpclient.RestS3Service
+
+import com.amazonaws.services.s3.AmazonS3Client
+import com.amazonaws.services.s3.model.Bucket
+import grails.plugin.awssdk.AmazonWebService
+import grails.util.Holders
 
 class S3StorageProvider extends StorageProvider {
-	static String name = "Amazon S3"
-	String accessKey
-	String secret
 
-	def getS3Service() {
-		new RestS3Service(this.getAWSCredentials());
-	}
+    static String name = "Amazon S3"
 
-	def getAWSCredentials() {
-		new AWSCredentials(accessKey, secret);
-	}
+    AmazonWebService amazonWebService
 
 	Directory getDirectory(String name) {
 		new S3Directory(name: name, provider: this)
 	}
 
-	
-
-	def getDirectories() {
-		def buckets = s3Service.listAllBuckets()
-		buckets.collect { bucket -> directoryFromS3Bucket(bucket)}
+	List<Directory> getDirectories() {
+		List<Bucket> buckets = s3Client.listBuckets()
+        buckets.collect { bucket -> directoryFromS3Bucket(bucket)}
 	}
 
-	private S3Directory directoryFromS3Bucket(bucket) {
-		new S3Directory(name: bucket.name, provider: this)
+    AmazonS3Client getS3Client(String regionName = '') {
+        if (!amazonWebService) {
+            amazonWebService = Holders.applicationContext.getBean('amazonWebService')
+        }
+        amazonWebService.getS3(regionName)
+    }
+
+    // PRIVATE
+
+    private S3Directory directoryFromS3Bucket(bucket) {
+		new S3Directory(
+                name: bucket.name,
+                provider: this
+        )
 	}
 
 }
