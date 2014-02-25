@@ -26,6 +26,8 @@ grails.project.dependency.resolution = {
 
         runtime ':aws-sdk:1.7.1'
         runtime ':karman:0.1.1'
+
+        test ':code-coverage:1.2.7'
     }
 }
 //grails.plugin.location."karman" = "../karman"
