@@ -12,5 +12,5 @@ class KarmanAwsGrailsPlugin {
     def scm             = [ url: "http://github.com/bertramdev/karman-aws" ]
     def pluginExcludes  = [
     ]
-    def developers      = [ [name: 'Brian Wheeler'] ]
+    def developers      = [ [name: 'Brian Wheeler'], [name: 'Benoit Hediard'] ]
 }

@@ -18,9 +18,9 @@ grails.plugin.awssdk.secretKey = {SECRET_KEY}
 
 If you do not provide credentials in grails-app/conf/Config.groovy, a credentials provider chain will be used that searches for credentials in this order:
 
-- Environment Variables - AWS_ACCESS_KEY_ID and AWS_SECRET_KEY
-- Java System Properties - aws.accessKeyId and aws.secretKey
-- Instance profile credentials delivered through the Amazon EC2 metadata service (IAM role)
+- Environment Variables - *AWS_ACCESS_KEY_ID* and *AWS_SECRET_KEY*
+- Java System Properties - *aws.accessKeyId* and *aws.secretKey*
+- Instance profile credentials delivered through the Amazon EC2 metadata service (*IAM role*)
 
 You can also specify credentials when you instantiate S3StorageProvider`.
 
@@ -36,7 +36,11 @@ import com.bertramlabs.plugins.karman.*
 // To use credentials from Config.groovy or credential provider chain
 def provider = new S3StorageProvider()
 // Or
-provider = new S3StorageProvider(accessKey: ACCESS_KEY, secretKey: SECRET_KEY, region: 'eu-west-1')
+provider = new S3StorageProvider(
+    accessKey: ACCESS_KEY,
+    secretKey: SECRET_KEY,
+    region: 'eu-west-1'
+)
 
 //example getting file contents
 def file = provider['mybucket']['example.txt']
