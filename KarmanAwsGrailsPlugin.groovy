@@ -1,5 +1,8 @@
+import com.bertramlabs.plugins.karman.KarmanConfigHolder
+import com.bertramlabs.plugins.karman.aws.S3StorageProvider
+
 class KarmanAwsGrailsPlugin {
-    def version         = "0.3.0"
+    def version         = "0.3.1"
     def grailsVersion   = "2.0 > *"
     def title           = "Karman AWS Plugin"
     def author          = "David Estes"
@@ -13,4 +16,14 @@ class KarmanAwsGrailsPlugin {
     def pluginExcludes  = [
     ]
     def developers      = [ [name: 'Brian Wheeler'], [name: 'Benoit Hediard'] ]
+
+
+    def doWithApplicationContext = { applicationContext ->
+        def config = application.config.grails.plugins.karman
+
+        KarmanConfigHolder.providerTypes += [
+            s3: S3StorageProvider,
+            aws: S3StorageProvider
+        ]
+    }
 }
