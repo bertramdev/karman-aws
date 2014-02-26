@@ -199,16 +199,11 @@ class S3CloudFile extends CloudFile {
     /**
      * Save file
      */
-	def save(acl = '') {
+	def save(acl) {
         if (valid) {
             assert inputStream
-            /*if (exists()) {
-                delete()
-            }*/
-            if (acl) {
-                // If not define, it will use default acl (private)
-                setMetaAttribute(Headers.S3_CANNED_ACL, acl)
-            }
+            setMetaAttribute(Headers.S3_CANNED_ACL, acl)
+            
             s3Client.putObject(parent.name, name, inputStream, object.objectMetadata)
             object = null
             summary = null

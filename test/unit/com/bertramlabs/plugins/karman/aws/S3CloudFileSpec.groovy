@@ -26,7 +26,7 @@ class S3CloudFileSpec extends Specification {
         provider = new S3StorageProvider()
         provider.amazonWebService = Mock(AmazonWebService)
         directory = new S3Directory(name: DIRECTORY_NAME, provider: provider)
-        file = new S3CloudFile(name: FILE_NAME,parent: directory)
+        file = new S3CloudFile(name: FILE_NAME,parent: directory, provider: provider)
     }
 
     void "Testing if file exists"() {
