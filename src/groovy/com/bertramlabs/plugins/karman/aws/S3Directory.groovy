@@ -50,7 +50,7 @@ class S3Directory extends Directory {
      * Create bucket for a given region (default to region in config if not defined)
      * @return Bucket
      */
-	void save() {
+	def save() {
         if (region) {
             s3Client.createBucket(name, region)
         } else {
