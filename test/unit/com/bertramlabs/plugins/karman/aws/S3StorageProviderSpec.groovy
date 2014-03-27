@@ -2,7 +2,6 @@ package com.bertramlabs.plugins.karman.aws
 
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.Bucket
-import grails.plugin.awssdk.AmazonWebService
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
@@ -14,32 +13,6 @@ class S3StorageProviderSpec extends Specification {
 
     def setup() {
         provider = new S3StorageProvider()
-        provider.amazonWebService = Mock(AmazonWebService)
-    }
-
-    void "Getting s3Client provider"() {
-        when:
-        def client = provider.s3Client
-
-        then:
-        client
-        1 * provider.amazonWebService.getS3('') >> {
-            Mock(AmazonS3Client)
-        }
-    }
-
-    void "Getting s3Client provider with region"() {
-        given:
-        provider.region = 'eu-west-1'
-
-        when:
-        def client = provider.s3Client
-
-        then:
-        client
-        1 * provider.amazonWebService.getS3('eu-west-1') >> {
-            Mock(AmazonS3Client)
-        }
     }
 
     void "Getting s3Client provider with credentials and region"() {

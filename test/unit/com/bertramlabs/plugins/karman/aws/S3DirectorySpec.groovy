@@ -4,7 +4,6 @@ import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.Bucket
 import com.amazonaws.services.s3.model.ObjectListing
 import com.amazonaws.services.s3.model.S3ObjectSummary
-import grails.plugin.awssdk.AmazonWebService
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
@@ -18,8 +17,10 @@ class S3DirectorySpec extends Specification {
     S3Directory directory
 
     def setup() {
-        provider = new S3StorageProvider()
-        provider.amazonWebService = Mock(AmazonWebService)
+        provider = new S3StorageProvider(accessKey: 'ACCESS_KEY',
+                secretKey: 'SECRET_KEY',
+                region: 'eu-west-1')
+
         directory = new S3Directory(name: DIRECTORY_NAME, provider: provider)
     }
 

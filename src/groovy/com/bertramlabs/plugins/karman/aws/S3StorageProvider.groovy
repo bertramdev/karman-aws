@@ -23,17 +23,15 @@ import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.Bucket
 import com.bertramlabs.plugins.karman.Directory
 import com.bertramlabs.plugins.karman.StorageProvider
-import grails.plugin.awssdk.AmazonWebService
 import grails.util.Holders
 
 class S3StorageProvider extends StorageProvider {
 
-    static String name = "Amazon S3"
+    static String providerName = "s3"
 
     String accessKey = ''
     String secretKey = ''
     String region = ''
-    AmazonWebService amazonWebService
 
 	Directory getDirectory(String name) {
 		new S3Directory(name: name, provider: this)
@@ -54,10 +52,7 @@ class S3StorageProvider extends StorageProvider {
                 client.region = region
             }
         } else {
-            if (!amazonWebService) {
-                amazonWebService = Holders.applicationContext.getBean('amazonWebService')
-            }
-            client = amazonWebService.getS3(region)
+            return null
         }
         client
     }

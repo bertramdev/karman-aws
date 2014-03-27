@@ -23,8 +23,9 @@ class S3CloudFileSpec extends Specification {
     S3CloudFile file
 
     def setup() {
-        provider = new S3StorageProvider()
-        provider.amazonWebService = Mock(AmazonWebService)
+        provider = new S3StorageProvider(accessKey: 'ACCESS_KEY',
+                secretKey: 'SECRET_KEY',
+                region: 'eu-west-1')
         directory = new S3Directory(name: DIRECTORY_NAME, provider: provider)
         file = new S3CloudFile(name: FILE_NAME,parent: directory, provider: provider)
     }
