@@ -18,20 +18,18 @@ grails.project.dependency.resolution = {
         // build 'org.apache.httpcomponents:httpclient:4.2'
         // runtime 'org.apache.httpcomponents:httpcore:4.2'
         // runtime 'org.apache.httpcomponents:httpclient:4.2'
-        // runtime 'com.amazonaws:aws-java-sdk:1.7.1'
+        runtime 'com.amazonaws:aws-java-sdk:1.7.7'
         compile('com.bertramlabs.plugins:karman-aws-groovy:0.4.0') {
             excludes 'karman-core'
         }
     }
 
     plugins {
-        build ':tomcat:7.0.50.1'
+        build ':tomcat:7.0.52.1'
         build(':release:3.0.1') {
             export = false
         }
-
-        runtime ':aws-sdk:1.7.1'
-        runtime ':karman:0.5.1'
+        runtime ':karman:0.5.2'
 
         test ':code-coverage:1.2.7'
     }
