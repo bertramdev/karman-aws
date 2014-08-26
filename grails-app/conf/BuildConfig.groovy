@@ -19,7 +19,7 @@ grails.project.dependency.resolution = {
         // runtime 'org.apache.httpcomponents:httpcore:4.2'
         // runtime 'org.apache.httpcomponents:httpclient:4.2'
         runtime 'com.amazonaws:aws-java-sdk:1.7.7'
-        compile('com.bertramlabs.plugins:karman-aws-groovy:0.4.0') {
+        compile('com.bertramlabs.plugins:karman-aws-groovy:0.5.1') {
             excludes 'karman-core'
         }
     }
@@ -29,7 +29,7 @@ grails.project.dependency.resolution = {
         build(':release:3.0.1') {
             export = false
         }
-        runtime ':karman:0.5.2'
+        runtime ':karman:0.5.3'
 
         test ':code-coverage:1.2.7'
     }
