@@ -9,8 +9,6 @@ grails.project.dependency.resolution = {
         grailsCentral()
         grailsPlugins()
         mavenCentral()
-        mavenRepo 'http://dl.bintray.com/karman/karman'
-
     }
 
     dependencies {
@@ -19,7 +17,7 @@ grails.project.dependency.resolution = {
         // runtime 'org.apache.httpcomponents:httpcore:4.2'
         // runtime 'org.apache.httpcomponents:httpclient:4.2'
         runtime 'com.amazonaws:aws-java-sdk:1.7.7'
-        compile('com.bertramlabs.plugins:karman-aws-groovy:0.5.1') {
+        compile('com.bertramlabs.plugins:karman-aws-groovy:0.6.0') {
             excludes 'karman-core'
         }
     }
@@ -29,7 +27,7 @@ grails.project.dependency.resolution = {
         build(':release:3.0.1') {
             export = false
         }
-        runtime ':karman:0.5.3'
+        runtime ':karman:0.6.1'
 
         test ':code-coverage:1.2.7'
     }

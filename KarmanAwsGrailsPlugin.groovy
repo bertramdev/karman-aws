@@ -2,7 +2,7 @@ import com.bertramlabs.plugins.karman.KarmanConfigHolder
 import com.bertramlabs.plugins.karman.aws.S3StorageProvider
 
 class KarmanAwsGrailsPlugin {
-    def version         = "0.5.1"
+    def version         = "0.6.0"
     def grailsVersion   = "2.0 > *"
     def title           = "Karman AWS Plugin"
     def author          = "David Estes"
@@ -20,10 +20,5 @@ class KarmanAwsGrailsPlugin {
 
     def doWithApplicationContext = { applicationContext ->
         def config = application.config.grails.plugins.karman
-
-        KarmanConfigHolder.providerTypes += [
-            s3: S3StorageProvider,
-            aws: S3StorageProvider
-        ]
     }
 }
