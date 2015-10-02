@@ -6,6 +6,7 @@ grails.project.dependency.resolution = {
     log 'warn'
     legacyResolve false
     repositories {
+        mavenLocal()
         grailsCentral()
         grailsPlugins()
         mavenCentral()
@@ -16,8 +17,8 @@ grails.project.dependency.resolution = {
         // build 'org.apache.httpcomponents:httpclient:4.2'
         // runtime 'org.apache.httpcomponents:httpcore:4.2'
         // runtime 'org.apache.httpcomponents:httpclient:4.2'
-        runtime 'com.amazonaws:aws-java-sdk:1.7.7'
-        compile('com.bertramlabs.plugins:karman-aws-groovy:0.6.0') {
+        runtime 'com.amazonaws:aws-java-sdk:1.9.29'
+        compile('com.bertramlabs.plugins:karman-aws-groovy:0.6.5') {
             excludes 'karman-core'
         }
     }
