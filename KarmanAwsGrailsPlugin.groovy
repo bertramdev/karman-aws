@@ -2,7 +2,7 @@ import com.bertramlabs.plugins.karman.KarmanConfigHolder
 import com.bertramlabs.plugins.karman.aws.S3StorageProvider
 
 class KarmanAwsGrailsPlugin {
-    def version         = "0.8.3"
+    def version         = "0.8.4"
     def grailsVersion   = "2.0 > *"
     def title           = "Karman AWS Plugin"
     def author          = "David Estes"
